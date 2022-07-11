@@ -1,7 +1,8 @@
 from django.db import models
+from datetime import datetime
 
 # Create your models here.
 
-class VerificationCode(models.Model):
-    date = models.DateField(_("Date"), default=datetime.now())
+class Record(models.Model):
+    date = models.DateTimeField(default=datetime.now())
     no_cars = models.IntegerField()
