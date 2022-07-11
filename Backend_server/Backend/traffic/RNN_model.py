@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
+from django.core.cache import cache
 
 from datetime import datetime, timedelta
 from sklearn.preprocessing import MinMaxScaler
@@ -10,6 +10,8 @@ from tensorflow import keras
 from tensorflow.keras import layers
 
 from traffic.models import Record
+
+import threading
 
 def get_series_data(window, data):
     X = []
@@ -45,7 +47,9 @@ value_train = []
 records = Record.objects.values('no_cars')
 for record in records:
     value_train.append(record["no_cars"])
-print(value_train)
+
+last_data = value_train[:10]
+cache.set('last_data', last_data)
 
 # reshape data
 value_train = np.array(value_train).reshape(-1, 1)
@@ -71,5 +75,7 @@ history = {}
 history['model'] = model.fit(
     X_train, Y_train, validation_split=0.2, batch_size=4, epochs=2
 )
+model.save('model')
+
 
 
