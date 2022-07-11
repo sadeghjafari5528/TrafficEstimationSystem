@@ -1,3 +1,7 @@
+# Local file
+Embedded_System/results/
+Embedded_System/od-models/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
