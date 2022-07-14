@@ -73,7 +73,7 @@ model.compile(
 
 history = {}
 history['model'] = model.fit(
-    X_train, Y_train, validation_split=0.2, batch_size=4, epochs=2
+    X_train, Y_train, validation_split=0.2, batch_size=4, epochs=50
 )
 model.save('model')
 

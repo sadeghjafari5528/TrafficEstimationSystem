@@ -14,7 +14,6 @@ def predict_traffic(request):
     last_data = cache.get('last_data')
     
     test_data = last_data[-window:]
-    print(test_data)
     # reshape data
     test_data = np.array(last_data).reshape(-1, 1)
     # normalize data
@@ -33,22 +32,24 @@ def predict_traffic(request):
 def get_cars(request):
     no_cars = request.data['no_cars']
     record = Record(no_cars=no_cars)
+    record.save()
+
     last_data = cache.get('last_data')
     last_data.insert(0, int(no_cars))
     last_data.pop()
     cache.set('last_data', last_data)
     
 
-    # reshape data
-    last_data = np.array(last_data).reshape(-1, 1)
-    # normalize data
-    X_train, Y_train = get_series_data(window, last_data)
+    # # reshape data
+    # last_data = np.array(last_data).reshape(-1, 1)
+    # # normalize data
+    # X_train, Y_train = get_series_data(window, last_data)
 
-    model = tf.keras.models.load_model('model')
-    model.fit(
-        X_train, Y_train, validation_split=0, batch_size=4, epochs=2
-    )
-    model.save('model')
-    record.save()
+    # model = tf.keras.models.load_model('model')
+    # model.fit(
+    #     X_train, Y_train, validation_split=0, batch_size=4, epochs=2
+    # )
+    # model.save('model')
+    print("number of cars:", no_cars)
     data = {"message":"create record successfully"}
     return Response(data=data, status=status.HTTP_201_CREATED)

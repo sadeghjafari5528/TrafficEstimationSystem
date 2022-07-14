@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 # coding: utf-8
+
+  
+
+
+
 """
 Object Detection (On Video) From TF2 Saved Model
 =====================================
@@ -12,9 +17,14 @@ import tensorflow as tf
 import cv2
 import argparse
 
+import requests
+
 from datetime import datetime
 import matplotlib.pyplot as plt
 import pandas as pd
+
+# server url
+url = "http://127.0.0.1:8000/api/traffic/get_cars/"
 
 tf.get_logger().setLevel('ERROR')           # Suppress TensorFlow logging (2)
 
@@ -24,7 +34,7 @@ parser.add_argument('--model', help='Folder that the Saved Model is Located In',
 parser.add_argument('--labels', help='Where the Labelmap is Located',
                     default='data/mscoco_label_map.pbtxt')
 parser.add_argument('--video', help='Name of the video to perform detection on',
-                    default='test.mp4')
+                    default='results/test2.mp4')
 parser.add_argument('--threshold', help='Minimum confidence threshold for displaying detected objects',
                     default=0.5)
                     
@@ -101,7 +111,7 @@ width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH) + 0.5)
 height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT) + 0.5)
 size = (width, height)
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
-out = cv2.VideoWriter('your_video.avi', fourcc, 20.0, size)
+out = cv2.VideoWriter('results/your_video2.avi', fourcc, 20.0, size)
 
 # added code
 car_count_list = []
@@ -153,7 +163,7 @@ while(video.isOpened()):
     for i in range(len(scores)):
         if ((scores[i] > MIN_CONF_THRESH) and (scores[i] <= 1.0)):
             object_name = category_index[int(classes[i])]['name'] # Look up object name from "labels" array using class index
-            if (object_name == "car"):
+            if (object_name == "person"):
                 #increase count
                 count += 1
                 # Get bounding box coordinates and draw box
@@ -177,7 +187,7 @@ while(video.isOpened()):
             
             
 
-    cv2.putText (frame,'Cars Detected : ' + str(count),(10,25),cv2.FONT_HERSHEY_SIMPLEX,1,(70,235,52),2,cv2.LINE_AA)
+    cv2.putText (frame,'Persons Detected : ' + str(count),(10,25),cv2.FONT_HERSHEY_SIMPLEX,1,(70,235,52),2,cv2.LINE_AA)
     cv2.imshow('Object Detector', frame)
 
     # added code
@@ -185,9 +195,13 @@ while(video.isOpened()):
     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
     if len(time_list) == 0:
       car_count_list.append(count)
+      data = {'no_cars':count}
+      r = requests.post(url = url, data = data)
       time_list.append(now)
     elif time_list[-1].strftime("%d/%m/%Y %H:%M:%S") != dt_string:
       car_count_list.append(count)
+      data = {'no_cars':count}
+      r = requests.post(url = url, data = data)
       time_list.append(now)
       print(dt_string, count)
 
@@ -199,7 +213,7 @@ cv2.destroyAllWindows()
 
 raw_data = {"date":time_list, "value":car_count_list}
 data = pd.DataFrame(raw_data, columns = ['date', 'value'])
-data.to_csv('test.csv', index=False)
+data.to_csv('results/test2.csv', index=False)
 # plot
 plt.plot(time_list,car_count_list)
 # beautify the x-labels
